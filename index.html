@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MyC Arcoíris - Galletas Artesanales</title>
 
+  <!-- Evita 404 de favicon -->
+  <link rel="icon" href="data:,">
+
   <style>
     :root{
       --bg1:#68e4ea;
@@ -179,7 +182,6 @@
       font-size: .95rem;
     }
 
-    /* botones */
     .btn, .btn-primary{
       width: 100%;
       border:none;
@@ -205,7 +207,6 @@
       padding: 12px 10px;
     }
 
-    /* Cart */
     .cart{
       position: sticky;
       top: 18px;
@@ -288,7 +289,6 @@
 
     .cart-actions{ display:flex; gap: 10px; margin-top: 10px; }
 
-    /* ===== Modal ===== */
     .modal{
       position: fixed;
       inset: 0;
@@ -451,12 +451,17 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    // ✅ Supabase
+    // ===== Supabase (A PRUEBA DE DUPLICADOS) =====
     const SUPABASE_URL = "https://fnpgecsodcmdsoxizuav.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_JHiL9IwX8bsVvrlUvGxFoQ_aT_JnC45";
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const SUPABASE_ANON_KEY = "sb_publishable_JHiL9IwX8bsVvrlUvGxFoQ_aT_JnC45";
 
-    // ✅ Productos
+    // Guardamos el cliente en window para que aunque el script se cargue 2 veces, no truene.
+    if (!window.__sbClient) {
+      window.__sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    }
+    const supabaseClient = window.__sbClient;
+
+    // ===== Productos =====
     const galletas = [
       { id: 1, nombre: "Choco Chip", descripcion: "Galleta con chips de chocolate.", precio: 600, imagen: "img/choco.jpg", tag: "Más vendida" },
       { id: 2, nombre: "Vainilla", descripcion: "Clásica galleta de vainilla.", precio: 800, imagen: "img/vainilla.jpg", tag: "Clásica" },
@@ -467,7 +472,7 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
       { id: 7, nombre: "Canela", descripcion: "Con canela natural.", precio: 350, imagen: "img/canela.jpg", tag: "Especial" }
     ];
 
-    let carrito = []; // {id, nombre, precio, cantidad}
+    let carrito = [];
 
     function money(n){ return Number(n).toFixed(2); }
 
@@ -643,7 +648,6 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
       const total = Number(document.getElementById("totalPrecio").textContent);
 
-      // 1) Guardar en Supabase
       const payload = {
         nombre,
         telefono: tel,
@@ -659,14 +663,13 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         total
       };
 
-      const { error } = await supabase.from("pedidos").insert(payload);
+      const { error } = await supabaseClient.from("pedidos").insert(payload);
       if (error){
         console.error(error);
-        alert("No se pudo guardar el pedido. Revisa permisos (RLS) o la tabla.");
+        alert("No se pudo guardar el pedido. Revisa RLS/policies o la tabla.");
         return;
       }
 
-      // 2) WhatsApp
       let msg = `Hola! Soy ${encodeURIComponent(nombre)}. Quiero hacer este pedido:%0A%0A`;
       carrito.forEach(item => {
         msg += `${encodeURIComponent(item.nombre)} x${item.cantidad} - ₡${money(item.precio * item.cantidad)}%0A`;
@@ -678,49 +681,34 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
       if (notas) msg += `*Notas:* ${encodeURIComponent(notas)}%0A`;
 
       const telefonoTienda = "50671025450";
-      const url = `https://wa.me/${telefonoTienda}?text=${msg}`;
-      window.open(url, "_blank");
+      window.open(`https://wa.me/${telefonoTienda}?text=${msg}`, "_blank");
 
-      // 3) limpiar
       cerrarModal();
       carrito = [];
       actualizarCarrito();
       document.querySelector(".modal-form").reset();
     }
 
-    // Cerrar modal al click fuera
     document.addEventListener("click", (e) => {
       const modal = document.getElementById("modalPedido");
       if (!modal.classList.contains("open")) return;
       if (e.target === modal) cerrarModal();
     });
 
-    // Cerrar con ESC
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape") cerrarModal();
     });
 
-   
-    // init (blindado)
-document.addEventListener("DOMContentLoaded", () => {
-  try {
-    mostrarProductos();
-    actualizarCarrito();
-  } catch (err) {
-    console.error("Error inicializando:", err);
-    const productosDiv = document.getElementById("productos");
-    if (productosDiv) {
-      productosDiv.innerHTML = `
-        <div class="card" style="padding:16px">
-          <h3>Error cargando productos</h3>
-          <p class="desc">Abre la consola (F12) para ver el error.</p>
-        </div>
-      `;
+    // Init seguro
+    function init(){
+      mostrarProductos();
+      actualizarCarrito();
     }
-  }
-});
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", init);
+    } else {
+      init();
+    }
   </script>
 </body>
 </html>
-
-
