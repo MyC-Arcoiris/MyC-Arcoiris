@@ -20,7 +20,6 @@
 
       --a1:#ffffff;
       --a2:#ffffff;
-
       --radius: 18px;
     }
 
@@ -227,7 +226,6 @@
     }
     .cart-head span{ color: var(--muted); font-size: .9rem; }
     .cart-body{ padding: 10px 14px 14px; }
-
     .empty{ color: var(--muted); padding: 10px 4px 16px; font-size: .95rem; }
 
     .cart-item{
@@ -249,7 +247,6 @@
     .cart-left small{ color: var(--muted); }
 
     .cart-right{ display:flex; align-items:center; gap: 10px; flex-shrink: 0; }
-
     .mini-qty{
       display:flex;
       align-items:center;
@@ -287,7 +284,6 @@
     }
     .line{ display:flex; justify-content: space-between; color: var(--muted); font-size: .95rem; }
     .total{ display:flex; justify-content: space-between; font-weight: 900; font-size: 1.15rem; color: var(--text); }
-
     .cart-actions{ display:flex; gap: 10px; margin-top: 10px; }
 
     /* ===== Modal ===== */
@@ -303,7 +299,6 @@
       z-index: 999;
     }
     .modal.open{ display:flex; }
-
     .modal-box{
       width: min(520px, 100%);
       border-radius: 16px;
@@ -321,7 +316,6 @@
       border-bottom: 1px solid rgba(255,255,255,.12);
     }
     .modal-head h3{ font-size: 1.05rem; letter-spacing:.2px; }
-
     .modal-close{
       width: 38px;
       height: 38px;
@@ -331,7 +325,6 @@
       color: var(--text);
       cursor:pointer;
     }
-
     .modal-form{ padding: 14px; display:flex; flex-direction:column; gap: 12px; }
     .field{ display:flex; flex-direction:column; gap: 6px; }
     .field label{ font-size:.9rem; color: var(--muted); }
@@ -345,12 +338,11 @@
       outline:none;
     }
     .field input::placeholder, .field textarea::placeholder{ color: rgba(234,242,255,.55); }
-
     .modal-actions{ display:flex; gap: 10px; margin-top: 6px; }
     .modal-actions .btn-ghost{ flex:1; }
     .modal-actions .btn-primary{ flex:1.2; }
 
-    /* ===== Menú con miniaturas en la imagen ===== */
+    /* ===== Menú con miniaturas (PRO) ===== */
     .img-menu{ position:absolute; top:10px; right:10px; z-index:5; }
 
     .menu-btn{
@@ -364,13 +356,14 @@
 
     .menu-panel{
       position:absolute; right:0; top:44px;
-      width: 240px;
+      width: 260px;
       padding:10px;
       border-radius:14px;
       border:1px solid rgba(255,255,255,.18);
       background:rgba(10,15,25,.92);
       box-shadow:0 18px 50px rgba(0,0,0,.45);
       display:none;
+      z-index: 9999;
     }
     .img-menu.open .menu-panel{ display:block; }
 
@@ -398,7 +391,6 @@
       cursor:pointer;
       padding:0;
     }
-
     .thumb img{
       width:100%;
       height:100%;
@@ -411,46 +403,37 @@
       transform: scale(1.08);
       filter: brightness(1.05);
     }
-
     .thumb.active{
       outline: 2px solid rgba(255,255,255,.85);
       outline-offset: 2px;
     }
 
+    .menu-viewbig{
+      width: 100%;
+      margin-top: 8px;
+      border: 1px solid rgba(255,255,255,.18);
+      background: rgba(255,255,255,.12);
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 900;
+    }
+    .menu-viewbig:hover{ background: rgba(255,255,255,.18); }
+
     .menu-item{
       width:100%;
+      margin-top: 8px;
       border:none;
       background: rgba(255,255,255,.08);
       color:var(--text);
-      padding:10px;
+      padding:10px 12px;
       border-radius:12px;
       cursor:pointer;
       text-align:left;
       font-weight:800;
     }
     .menu-item:hover{ background: rgba(255,255,255,.12); }
-    /* Panel del menú (asegura que quede encima y con espacio) */
-.menu-panel{
-  z-index: 9999;
-  min-width: 220px;
-  padding: 10px;
-}
-
-/* Botón "Ver en grande" dentro del panel */
-.menu-viewbig{
-  width: 100%;
-  margin-top: 10px;
-  border: 1px solid rgba(255,255,255,.18);
-  background: rgba(255,255,255,.12);
-  color: var(--text);
-  padding: 10px 12px;
-  border-radius: 12px;
-  cursor: pointer;
-  font-weight: 800;
-}
-.menu-viewbig:hover{
-  background: rgba(255,255,255,.18);
-}
   </style>
 </head>
 
@@ -558,14 +541,10 @@
     // ===== Supabase (a prueba de duplicados) =====
     const SUPABASE_URL = "https://fnpgecsodcmdsoxizuav.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_JHiL9IwX8bsVvrlUvGxFoQ_aT_JnC45";
-
-    if (!window.__sbClient) {
-      window.__sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    }
+    if (!window.__sbClient) window.__sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     const supabaseClient = window.__sbClient;
 
-    // ===== Productos (con varias fotos por galleta) =====
-    // IMPORTANTE: sube estas fotos a tu repo y pon la ruta correcta.
+    // ===== Productos (pon tus rutas reales) =====
     const galletas = [
       {
         id: 1,
@@ -574,58 +553,14 @@
         precio: 1200,
         imagenes: ["galletamar.jpeg","galletamar2.jpeg","galletamar3.jpeg","galletamar4.jpeg","galletamar5.jpeg","galletamar6.jpeg"],
         tag: "Más vendida"
-      },
-      {
-        id: 2,
-        nombre: "Vainilla",
-        descripcion: "Clásica galleta de vainilla.",
-        precio: 800,
-        imagenes: ["img/vainilla1.jpg","img/vainilla2.jpg"],
-        tag: "Clásica"
-      },
-      {
-        id: 3,
-        nombre: "Avena y Pasas",
-        descripcion: "Con avena integral y pasas.",
-        precio: 300,
-        imagenes: ["img/avena1.jpg","img/avena2.jpg"],
-        tag: "Fit"
-      },
-      {
-        id: 4,
-        nombre: "Mantequilla",
-        descripcion: "Tradicional, suave y deliciosa.",
-        precio: 275,
-        imagenes: ["img/mantequilla1.jpg","img/mantequilla2.jpg"],
-        tag: "Suave"
-      },
-      {
-        id: 5,
-        nombre: "Fresa",
-        descripcion: "Sabor a fresa súper rico.",
-        precio: 325,
-        imagenes: ["img/fresa1.jpg","img/fresa2.jpg"],
-        tag: "Nueva"
-      },
-      {
-        id: 6,
-        nombre: "Almendra",
-        descripcion: "Con almendras naturales.",
-        precio: 375,
-        imagenes: ["img/almendra1.jpg","img/almendra2.jpg"],
-        tag: "Premium"
-      },
-      {
-        id: 7,
-        nombre: "Canela",
-        descripcion: "Con canela natural.",
-        precio: 350,
-        imagenes: ["img/canela1.jpg","img/canela2.jpg"],
-        tag: "Especial"
       }
+      // agrega más productos aquí...
     ];
 
     let carrito = [];
+
+    // Guarda qué miniatura está seleccionada por producto
+    const activeIndex = {}; // { [id]: number }
 
     function money(n){ return Number(n).toFixed(2); }
 
@@ -663,11 +598,14 @@
       const productosDiv = document.getElementById("productos");
 
       productosDiv.innerHTML = galletas.map(g => {
-        const mainImg = (g.imagenes && g.imagenes.length) ? g.imagenes[0] : "";
-        const thumbs = (g.imagenes || []).map((src, idx) => `
-          <button class="thumb ${idx===0 ? "active" : ""}" type="button"
-            onclick="cambiarImagen(event, ${g.id}, '${src}', ${idx})" title="Foto ${idx+1}">
-            <img src="${src}" alt="Miniatura ${idx+1}"
+        const imgs = Array.isArray(g.imagenes) && g.imagenes.length ? g.imagenes : [];
+        const idx = activeIndex[g.id] ?? 0;
+        const mainImg = imgs[idx] || imgs[0] || "";
+
+        const thumbs = imgs.map((src, i) => `
+          <button class="thumb ${i===idx ? "active" : ""}" type="button"
+            onclick="cambiarImagen(event, ${g.id}, ${i})" title="Foto ${i+1}">
+            <img src="${src}" alt="Miniatura ${i+1}"
               onerror="this.src='data:image/svg+xml;utf8,${encodeURIComponent(placeholderSVG('Foto'))}'">
           </button>
         `).join("");
@@ -684,12 +622,14 @@
               <div class="menu-panel">
                 <div class="menu-title">Fotos</div>
                 <div class="thumb-grid">${thumbs}</div>
-                <button class="menu-viewbig" type="button"
-  onclick="verImagen(event, getImagenActual(${g.id}), '${g.nombre}')">
-  🔍 Ver en grande
-</button>
-                <button class="menu-item" type="button" onclick="verImagenActual(event, ${g.id})">🔍 Ver grande</button>
-                <button class="menu-item" type="button" onclick="agregarAlCarritoDesdeMenu(event, ${g.id})">➕ Agregar 1</button>
+
+                <button class="menu-viewbig" type="button" onclick="verImagenActual(event, ${g.id})">
+                  🔍 Ver en grande
+                </button>
+
+                <button class="menu-item" type="button" onclick="agregarAlCarritoDesdeMenu(event, ${g.id})">
+                  ➕ Agregar 1
+                </button>
               </div>
             </div>
           </div>
@@ -882,9 +822,10 @@
     // ===== Menú miniaturas =====
     function toggleImgMenu(e, id){
       e.stopPropagation();
-      cerrarTodosLosMenus();
       const el = document.querySelector(`.img-menu[data-id="${id}"]`);
-      if (el) el.classList.toggle("open");
+      const isOpen = el && el.classList.contains("open");
+      cerrarTodosLosMenus();
+      if (el && !isOpen) el.classList.add("open");
     }
 
     function cerrarTodosLosMenus(){
@@ -893,11 +834,16 @@
 
     document.addEventListener("click", () => cerrarTodosLosMenus());
 
-    function cambiarImagen(e, id, src, idx){
+    function cambiarImagen(e, id, idx){
       e.stopPropagation();
+      activeIndex[id] = idx;
+
+      const g = galletas.find(x => x.id === id);
+      const imgs = Array.isArray(g?.imagenes) ? g.imagenes : [];
+      const src = imgs[idx];
 
       const img = document.getElementById(`img-${id}`);
-      if (img) img.src = src;
+      if (img && src) img.src = src;
 
       const menu = document.querySelector(`.img-menu[data-id="${id}"]`);
       if (menu){
@@ -907,10 +853,18 @@
       }
     }
 
+    function getImagenActualSrc(id){
+      const g = galletas.find(x => x.id === id);
+      if (!g) return "";
+      const imgs = Array.isArray(g.imagenes) ? g.imagenes : [];
+      const idx = activeIndex[id] ?? 0;
+      return imgs[idx] || imgs[0] || "";
+    }
+
     function verImagenActual(e, id){
       e.stopPropagation();
-      const img = document.getElementById(`img-${id}`);
-      if (img && img.src) window.open(img.src, "_blank");
+      const src = getImagenActualSrc(id);
+      if (src) window.open(src, "_blank");
       cerrarTodosLosMenus();
     }
 
@@ -924,23 +878,13 @@
       if (e.key === "Escape") cerrarModal();
     });
 
-    // Init seguro
+    // Init
     function init(){
       mostrarProductos();
       actualizarCarrito();
     }
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
     else init();
-    function getImagenActual(id){
-  // Usa la imagen principal del producto (o la primera de su galería si tienes array)
-  const g = galletas.find(x => x.id === id);
-  if (!g) return "";
-  if (Array.isArray(g.imagenes) && g.imagenes.length) return g.imagenes[0];
-  return g.imagen;
-}
   </script>
 </body>
 </html>
-
-
-
