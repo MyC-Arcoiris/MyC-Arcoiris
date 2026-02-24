@@ -700,9 +700,26 @@
       if (e.key === "Escape") cerrarModal();
     });
 
-    // init
+   
+    // init (blindado)
+document.addEventListener("DOMContentLoaded", () => {
+  try {
     mostrarProductos();
     actualizarCarrito();
+  } catch (err) {
+    console.error("Error inicializando:", err);
+    const productosDiv = document.getElementById("productos");
+    if (productosDiv) {
+      productosDiv.innerHTML = `
+        <div class="card" style="padding:16px">
+          <h3>Error cargando productos</h3>
+          <p class="desc">Abre la consola (F12) para ver el error.</p>
+        </div>
+      `;
+    }
+  }
+});
   </script>
 </body>
 </html>
+
