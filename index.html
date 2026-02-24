@@ -429,6 +429,28 @@
       font-weight:800;
     }
     .menu-item:hover{ background: rgba(255,255,255,.12); }
+    /* Panel del menú (asegura que quede encima y con espacio) */
+.menu-panel{
+  z-index: 9999;
+  min-width: 220px;
+  padding: 10px;
+}
+
+/* Botón "Ver en grande" dentro del panel */
+.menu-viewbig{
+  width: 100%;
+  margin-top: 10px;
+  border: 1px solid rgba(255,255,255,.18);
+  background: rgba(255,255,255,.12);
+  color: var(--text);
+  padding: 10px 12px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 800;
+}
+.menu-viewbig:hover{
+  background: rgba(255,255,255,.18);
+}
   </style>
 </head>
 
@@ -662,6 +684,10 @@
               <div class="menu-panel">
                 <div class="menu-title">Fotos</div>
                 <div class="thumb-grid">${thumbs}</div>
+                <button class="menu-viewbig" type="button"
+  onclick="verImagen(event, getImagenActual(${g.id}), '${g.nombre}')">
+  🔍 Ver en grande
+</button>
                 <button class="menu-item" type="button" onclick="verImagenActual(event, ${g.id})">🔍 Ver grande</button>
                 <button class="menu-item" type="button" onclick="agregarAlCarritoDesdeMenu(event, ${g.id})">➕ Agregar 1</button>
               </div>
@@ -905,8 +931,16 @@
     }
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
     else init();
+    function getImagenActual(id){
+  // Usa la imagen principal del producto (o la primera de su galería si tienes array)
+  const g = galletas.find(x => x.id === id);
+  if (!g) return "";
+  if (Array.isArray(g.imagenes) && g.imagenes.length) return g.imagenes[0];
+  return g.imagen;
+}
   </script>
 </body>
 </html>
+
 
 
