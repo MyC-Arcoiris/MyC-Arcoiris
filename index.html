@@ -342,6 +342,58 @@
       padding: 10px 12px;
       outline:none;
     }
+    /* ===== Menú desplegable en la imagen ===== */
+.img-menu{
+  position:absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 5;
+}
+
+.menu-btn{
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.18);
+  background: rgba(0,0,0,.28);
+  color: var(--text);
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size: 18px;
+  backdrop-filter: blur(10px);
+}
+
+.menu-panel{
+  position:absolute;
+  right: 0;
+  top: 44px;
+  width: 200px;
+  padding: 8px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.18);
+  background: rgba(10,15,25,.92);
+  box-shadow: 0 18px 50px rgba(0,0,0,.45);
+  display:none;
+}
+
+.img-menu.open .menu-panel{ display:block; }
+
+.menu-item{
+  width: 100%;
+  border:none;
+  background: transparent;
+  color: var(--text);
+  padding: 10px 10px;
+  border-radius: 12px;
+  cursor:pointer;
+  text-align:left;
+  font-weight: 700;
+}
+.menu-item:hover{
+  background: rgba(255,255,255,.10);
+}
     .field input::placeholder, .field textarea::placeholder{ color: rgba(234,242,255,.55); }
 
     .modal-actions{ display:flex; gap: 10px; margin-top: 6px; }
@@ -510,11 +562,21 @@
       const productosDiv = document.getElementById("productos");
       productosDiv.innerHTML = galletas.map(g => `
         <article class="card">
-          <div class="img-wrap">
-            <img src="${g.imagen}" alt="Foto de ${g.nombre}" loading="lazy"
-              onerror="this.src='data:image/svg+xml;utf8,${encodeURIComponent(placeholderSVG(g.nombre))}'">
-            <div class="badge">${g.tag || "Artesanal"}</div>
-          </div>
+         <div class="img-wrap">
+  <img src="${g.imagen}" alt="Foto de ${g.nombre}" loading="lazy"
+    onerror="this.src='data:image/svg+xml;utf8,${encodeURIComponent(placeholderSVG(g.nombre))}'">
+
+  <div class="badge">${g.tag || "Artesanal"}</div>
+
+  <div class="img-menu" data-id="${g.id}">
+    <button class="menu-btn" type="button" onclick="toggleImgMenu(event, ${g.id})">⋮</button>
+    <div class="menu-panel">
+      <button class="menu-item" type="button" onclick="verImagen(event, '${g.imagen}', '${g.nombre}')">🔍 Ver imagen</button>
+      <button class="menu-item" type="button" onclick="agregarAlCarritoDesdeMenu(event, ${g.id})">➕ Agregar 1</button>
+      <button class="menu-item" type="button" onclick="copiarNombre(event, '${g.nombre}')">📋 Copiar nombre</button>
+    </div>
+  </div>
+</div>
 
           <div class="card-body">
             <div class="title-row">
@@ -709,6 +771,58 @@
     } else {
       init();
     }
+    function toggleImgMenu(e, id){
+  e.stopPropagation();
+  cerrarTodosLosMenus();
+  const el = document.querySelector(`.img-menu[data-id="${id}"]`);
+  if (el) el.classList.toggle("open");
+}
+
+function cerrarTodosLosMenus(){
+  document.querySelectorAll(".img-menu.open").forEach(m => m.classList.remove("open"));
+}
+
+// Cierra el menú al hacer click fuera
+document.addEventListener("click", () => cerrarTodosLosMenus());
+
+function verImagen(e, src, nombre){
+  e.stopPropagation();
+  window.open(src, "_blank"); // abre la foto en otra pestaña
+  cerrarTodosLosMenus();
+}
+
+function agregarAlCarritoDesdeMenu(e, id){
+  e.stopPropagation();
+  // agrega 1 unidad
+  const existe = carrito.find(x => x.id === id);
+  const g = galletas.find(x => x.id === id);
+  if (!g) return;
+
+  if (existe) existe.cantidad = Math.min(99, existe.cantidad + 1);
+  else carrito.push({ id: g.id, nombre: g.nombre, precio: g.precio, cantidad: 1 });
+
+  actualizarCarrito();
+  cerrarTodosLosMenus();
+}
+
+async function copiarNombre(e, nombre){
+  e.stopPropagation();
+  try{
+    await navigator.clipboard.writeText(nombre);
+    alert("Copiado: " + nombre);
+  }catch{
+    // fallback
+    const ta = document.createElement("textarea");
+    ta.value = nombre;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand("copy");
+    ta.remove();
+    alert("Copiado: " + nombre);
+  }
+  cerrarTodosLosMenus();
+}
   </script>
 </body>
 </html>
+
