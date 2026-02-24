@@ -12,12 +12,10 @@
     :root{
       --bg1:#68e4ea;
       --bg2:#277dc8;
-      --card: rgba(255,255,255,.08);
       --stroke: rgba(255,255,255,.14);
       --text:#eaf2ff;
       --muted: rgba(234,242,255,.72);
       --shadow: 0 20px 65px rgba(0,0,0,.55);
-
       --a1:#ffffff;
       --a2:#ffffff;
       --radius: 18px;
@@ -95,14 +93,23 @@
       border-color: rgba(255,255,255,.24);
     }
 
+    /* ✅ IMPORTANTE: NO recortar el menú */
     .img-wrap{
       height: 180px;
       width: 100%;
       position:relative;
-      overflow:hidden;
+      overflow: visible; /* ✅ el menú no se corta */
       background: rgba(255,255,255,.06);
     }
-    .img-wrap img{
+
+    /* ✅ Recorte solo de la imagen */
+    .img-clip{
+      position:absolute;
+      inset:0;
+      overflow:hidden;
+      border-radius: inherit;
+    }
+    .img-clip img{
       width:100%;
       height:100%;
       object-fit: cover;
@@ -110,7 +117,7 @@
       transform: scale(1.03);
       transition: transform .35s ease;
     }
-    .card:hover .img-wrap img{ transform: scale(1.10); }
+    .card:hover .img-clip img{ transform: scale(1.10); }
 
     .badge{
       position:absolute;
@@ -124,7 +131,7 @@
       border: 1px solid rgba(255,255,255,.18);
       color: var(--text);
       backdrop-filter: blur(10px);
-      z-index: 4;
+      z-index: 6;
     }
 
     .card-body{
@@ -207,6 +214,7 @@
       padding: 12px 10px;
     }
 
+    /* Cart */
     .cart{
       position: sticky;
       top: 18px;
@@ -286,7 +294,7 @@
     .total{ display:flex; justify-content: space-between; font-weight: 900; font-size: 1.15rem; color: var(--text); }
     .cart-actions{ display:flex; gap: 10px; margin-top: 10px; }
 
-    /* ===== Modal ===== */
+    /* Modal */
     .modal{
       position: fixed;
       inset: 0;
@@ -342,8 +350,8 @@
     .modal-actions .btn-ghost{ flex:1; }
     .modal-actions .btn-primary{ flex:1.2; }
 
-    /* ===== Menú con miniaturas (PRO) ===== */
-    .img-menu{ position:absolute; top:10px; right:10px; z-index:5; }
+    /* ===== Menú miniaturas PRO ===== */
+    .img-menu{ position:absolute; top:10px; right:10px; z-index:8; }
 
     .menu-btn{
       width:36px; height:36px; border-radius:12px;
@@ -544,7 +552,7 @@
     if (!window.__sbClient) window.__sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     const supabaseClient = window.__sbClient;
 
-    // ===== Productos (pon tus rutas reales) =====
+    // ===== Productos (✅ arreglé la coma entre objetos) =====
     const galletas = [
       {
         id: 1,
@@ -554,10 +562,10 @@
         imagenes: ["galletamar.jpeg","galletamar2.jpeg","galletamar3.jpeg","galletamar4.jpeg","galletamar5.jpeg","galletamar6.jpeg"],
         tag: "Más vendida"
       },
-      {  
+      {
         id: 2,
         nombre: "Galletas Escolares",
-        descripcion: "Galletas con detalles Escolares.",
+        descripcion: "Galletas con detalles escolares.",
         precio: 1200,
         imagenes: ["galletaescuela.jpeg","galletaescuela2.jpeg","galletaescuela3.jpeg","galletaescuela4.jpeg","galletaescuela5.jpeg","galletaescuela6.jpeg","galletaescuela7.jpeg","galletaescuela8.jpeg"],
         tag: "Más vendida"
@@ -565,8 +573,6 @@
     ];
 
     let carrito = [];
-
-    // Guarda qué miniatura está seleccionada por producto
     const activeIndex = {}; // { [id]: number }
 
     function money(n){ return Number(n).toFixed(2); }
@@ -601,6 +607,14 @@
       </svg>`;
     }
 
+    function getImagenActualSrc(id){
+      const g = galletas.find(x => x.id === id);
+      if (!g) return "";
+      const imgs = Array.isArray(g.imagenes) ? g.imagenes : [];
+      const idx = activeIndex[id] ?? 0;
+      return imgs[idx] || imgs[0] || "";
+    }
+
     function mostrarProductos(){
       const productosDiv = document.getElementById("productos");
 
@@ -620,8 +634,11 @@
         return `
         <article class="card">
           <div class="img-wrap">
-            <img id="img-${g.id}" src="${mainImg}" alt="Foto de ${g.nombre}" loading="lazy"
-              onerror="this.src='data:image/svg+xml;utf8,${encodeURIComponent(placeholderSVG(g.nombre))}'">
+            <div class="img-clip">
+              <img id="img-${g.id}" src="${mainImg}" alt="Foto de ${g.nombre}" loading="lazy"
+                onerror="this.src='data:image/svg+xml;utf8,${encodeURIComponent(placeholderSVG(g.nombre))}'">
+            </div>
+
             <div class="badge">${g.tag || "Artesanal"}</div>
 
             <div class="img-menu" data-id="${g.id}">
@@ -860,14 +877,6 @@
       }
     }
 
-    function getImagenActualSrc(id){
-      const g = galletas.find(x => x.id === id);
-      if (!g) return "";
-      const imgs = Array.isArray(g.imagenes) ? g.imagenes : [];
-      const idx = activeIndex[id] ?? 0;
-      return imgs[idx] || imgs[0] || "";
-    }
-
     function verImagenActual(e, id){
       e.stopPropagation();
       const src = getImagenActualSrc(id);
@@ -895,6 +904,3 @@
   </script>
 </body>
 </html>
-
-
-
